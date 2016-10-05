@@ -86,9 +86,9 @@ function Trainer:train(epoch, dataloader)
       lossSum = lossSum + loss
       debug_loss = debug_loss + loss
       if (n%200) == 0 then
-          losses[#losses + 1] = debug_loss/100
+          losses[#losses + 1] = debug_loss/200
 
-          gnuplot.pngfigure('traininLoss_' .. tostring(epoch) .. '.png')
+          gnuplot.pngfigure('trainSpecs/trainLoss_' .. tostring(epoch) .. '.png')
 
           gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
           gnuplot.plotflush()
@@ -159,7 +159,7 @@ function Trainer:test(epoch, dataloader)
       if (n%10) == 0 then
         print((' | Test: [%d][%d/%d]    Time %.3f  loss %1.4f'):format( epoch, n, size, timer:time().real, loss))
         losses[#losses + 1] = debug_loss/10
-        gnuplot.pngfigure('testLoss_' .. tostring(epoch) .. '.png')
+        gnuplot.pngfigure('trainSpecs/testLoss_' .. tostring(epoch) .. '.png')
         gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
         gnuplot.plotflush()
         debug_loss = 0.0
