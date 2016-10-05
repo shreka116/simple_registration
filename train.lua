@@ -12,7 +12,7 @@
 local optim = require 'optim'
 
 local M = {}
-local Trainer = torch.class('USOF.Trainer', M)
+local Trainer = torch.class('BRR.Trainer', M)
 
 function Trainer:__init(model, criterion, opt, optimState)
    self.model           = model
