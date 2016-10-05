@@ -1,0 +1,7 @@
+checkpoints/model_*.t7
+checkpoints/optimState_*.t7
+checkpoints/testLoss_*.t7
+
+losses/*.png
+
+trainSpecs/training_*.txt
