@@ -37,10 +37,10 @@ function hzproc_Affine(img, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y
     return outs
 end
 
-
+print('generating data ......')
 for iter = 1, total_iter do 
 
-    if (iter%1000) == 0 then
+    if (iter%1000) == 0 and iter < 24000 then
         ref_cnt = ref_cnt + 1
         ref     = image.load(folderName .. imgDIR[ref_cnt + 2])
     end
@@ -115,3 +115,5 @@ for iter = 1, total_iter do
     img_cnt = img_cnt + 1
 end
 
+print('generating data DONE !!!! ')
+print('========================================================')
