@@ -82,13 +82,13 @@ function Trainer:train(epoch, dataloader)
         garbage, tmp_loss = optim.adagrad(feval, self.params, self.optimState)
       end
 
-      N = N + batchSize
+      N = n
       lossSum = lossSum + loss
       debug_loss = debug_loss + loss
       if (n%200) == 0 then
           losses[#losses + 1] = debug_loss/200
 
-          gnuplot.pngfigure('trainSpecs/trainLoss_' .. tostring(epoch) .. '.png')
+          gnuplot.pngfigure('losses/trainLoss_' .. tostring(epoch) .. '.png')
 
           gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
           gnuplot.plotflush()
@@ -105,16 +105,16 @@ function Trainer:train(epoch, dataloader)
           print(('|  Predicted Matrix: [%2.4f  %2.4f  %2.4f]     GroundTruth Matrix: [%2.4f  %2.4f  %2.4f]'):format(output[1][1][1],output[1][1][2],output[1][1][3],self.target[1][1][1],self.target[1][1][2],self.target[1][1][3]))
           print(('|                    [%2.4f  %2.4f  %2.4f]                         [%2.4f  %2.4f  %2.4f]'):format(output[1][2][1],output[1][2][2],output[1][2][3],self.target[1][2][1],self.target[1][2][2],self.target[1][2][3]))
           print('============================================================================')
-          collectgarbage()
+          -- collectgarbage()
       end
 
-	if (n%50) == 0 then
+	    if (n%50) == 0 then
    	     print((' | Epoch: [%d][%d/%d]    Time %.3f  Data %.3f  loss %1.4f'):format(
              epoch, n, trainSize, timer:time().real, dataTime, loss))--total_loss))
    	   -- check that the storage didn't get changed due to an unfortunate getParameters call
-   	end
+   	  end
 
- 	assert(self.params:storage() == self.model:parameters()[1]:storage())
+ 	    assert(self.params:storage() == self.model:parameters()[1]:storage())
 
       timer:reset()
       dataTimer:reset()
@@ -129,6 +129,7 @@ function Trainer:test(epoch, dataloader)
    local timer    = torch.Timer()
    local size     = dataloader:size()
    local N        = 0
+   local glob_n   = 0
    local lossSum  = 0.0
    local debug_loss = 0.0
    local losses   = {}
@@ -159,7 +160,7 @@ function Trainer:test(epoch, dataloader)
       if (n%10) == 0 then
         print((' | Test: [%d][%d/%d]    Time %.3f  loss %1.4f'):format( epoch, n, size, timer:time().real, loss))
         losses[#losses + 1] = debug_loss/10
-        gnuplot.pngfigure('trainSpecs/testLoss_' .. tostring(epoch) .. '.png')
+        gnuplot.pngfigure('losses/testLoss_' .. tostring(epoch) .. '.png')
         gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
         gnuplot.plotflush()
         debug_loss = 0.0
@@ -172,13 +173,14 @@ function Trainer:test(epoch, dataloader)
       end
 
       timer:reset()
+      glob_n = n
    end
    self.model:training()
 
 --   print((' * Finished epoch # %d     loss: %1.4f\n'):format(
 --      epoch, lossSum / N))
 
-   return lossSum / N
+   return lossSum / glob_n
 end
 
 function Trainer:copyInputs(sample)
@@ -196,7 +198,7 @@ end
 function Trainer:learningRate(epoch)
    -- Training schedule
    local decay = 0
-   if (self.opt.dataset == 'ABIDE') and (epoch%10 == 0) then
+   if (epoch >= 30000) and (epoch%10 == 0) then
 	return self.optimState.learningRate/2
    else
 	return self.optimState.learningRate

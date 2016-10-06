@@ -41,11 +41,13 @@ function M.SelectTransform(transforms)
         local photometric  = torch.random(1,5)
         local geometric    = torch.random(5,8)
 
-        if #transforms ~= 1 then
+        if #transforms ~= 2 then
           input = transforms[photometric](input)
           input = transforms[geometric](input)
         end
         
+        input = transforms[#transforms](input)
+
       return input
    end
 end
@@ -419,13 +421,51 @@ function M.Translations(var)
 
        local trans_x = torch.uniform(-var*input:size(3), var*input:size(3))
        local trans_y = torch.uniform(-var*input:size(3), var*input:size(3))
-    --    print(input:size())
-    --    print(gs:size())
+
+    --    local x_from, x_to, y_from, y_to = 0,0,0,0
+
+    --    if (trans_x < 0) and (trans_y < 0) then
+    --       x_from  = 1
+    --       x_to    = inputSize[3] + trans_x
+    --       y_from  = 1
+    --       y_to    = inputSize[2] + trans_y
+    --    elseif (trans_x < 0) and (trans_y >= 0) then
+    --       x_from  = 1
+    --       x_to    = inputSize[3] + trans_x
+    --       y_from  = trans_y
+    --       y_to    = inputSize[2]
+    --    elseif (trans_x >= 0) and (trans_y < 0) then
+    --       x_from  = trans_x
+    --       x_to    = inputSize[3]
+    --       y_from  = 1
+    --       y_to    = inputSize[2] + trans_y
+    --    elseif (trans_x >= 0) and (trans_y >= 0) then
+    --       x_from  = trans_x
+    --       x_to    = inputSize[3]
+    --       y_from  = trans_y
+    --       y_to    = inputSize[2]
+    --    end
+
+    --    local preDefinedSz = {256, 384}
+    --    local rndx   = torch.random(x_from, x_to - preDefinedSz[2])
+    --    local rndy   = torch.random(y_from, y_to - preDefinedSz[1])
+    --    local rndx2  = torch.random(x_from, x_to - preDefinedSz[2])
+    --    local rndy2  = torch.random(y_from, y_to - preDefinedSz[1])
+    --     -- channels x 256 x 384 image
+    --   --   print(x_from,x_to,y_from,y_to)
+    --   --  print(rndx,rndy, rndx2, rndy2)
+
+
+    --    local translated     = image.crop(input, rndx, rndy, rndx + preDefinedSz[2], rndy + preDefinedSz[1])
+
+    -- --    print(input:size())
+    -- --    print(gs:size())
        
-    --    input[{ {1,3},{},{} }] = image.translate(gs[{ {1,3},{},{} }], trans_x, trans_y)
-    --    input[{ {4,6},{},{} }] = image.translate(gs[{ {4,6},{},{} }], trans_x, trans_y)
+    -- --    input[{ {1,3},{},{} }] = image.translate(gs[{ {1,3},{},{} }], trans_x, trans_y)
+    -- --    input[{ {4,6},{},{} }] = image.translate(gs[{ {4,6},{},{} }], trans_x, trans_y)
        
        return image.translate(input, trans_x, trans_y)
+      -- return translated
     end
 end
 
@@ -452,18 +492,29 @@ function M.Rotation(var)
    end
 end
 
-function M.Scales(minSize, maxSize)
+-- function M.Scales(minSize, maxSize)
+--    return function(input)
+--       local w, h        = input:size(3), input:size(2)
+--       local factors     = torch.uniform(minSize, maxSize)
+--       local w1          = math.ceil(w*factors)
+--       local h1          = math.ceil(h*factors)
+--       local scaled      = image.scale(input, w1, h1)
+      
+--       return scaled_input--, rel_scaled_input  
+--    end
+-- end
+
+function M.Scales(w1, h1)
    return function(input)
-      local w, h        = input:size(3), input:size(2)
-      local factors     = torch.uniform(minSize, maxSize)
-      local w1          = math.ceil(w*factors)
-      local h1          = math.ceil(h*factors)
+      -- local w, h        = input:size(3), input:size(2)
+      -- local factors     = torch.uniform(minSize, maxSize)
+      -- local w1          = math.ceil(w*factors)
+      -- local h1          = math.ceil(h*factors)
       local scaled      = image.scale(input, w1, h1)
       
-      return scaled_input--, rel_scaled_input  
+      return scaled--, rel_scaled_input  
    end
 end
-
 
 function M.Identity()
    return function(input)

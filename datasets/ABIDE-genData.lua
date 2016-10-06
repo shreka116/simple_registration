@@ -13,7 +13,6 @@ local M = {}
 
 function M.exec(opt, cacheFile)
     if not paths.dir(opt.genData .. opt.dataset .. '/data') then
-	paths.mkdir(opt.genData .. opt.dataset .. '/data')
 	dofile('generateData.lua')	
     end    
     local tr_vl_split   = io.open(opt.genData .. opt.dataset .. '/brainMRI_train_val.txt','r')

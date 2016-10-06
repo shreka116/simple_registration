@@ -23,6 +23,7 @@ local ref_cnt = 1
 print(imgDIR)
 local ref       = image.load(folderName .. imgDIR[ref_cnt + 2])
 
+paths.mkdir(targetFolder)
 
 function hzproc_Affine(img, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y, rotation)
 	-- affine transformation matrix
@@ -31,7 +32,7 @@ function hzproc_Affine(img, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y
 	mat = mat * hzproc.Affine.Rotate(rotation)
 	mat = mat * hzproc.Affine.Shear(shear_x, shear_y)
 	-- affine mapping
-	outs = hzproc.Remap.Affine(img:cuda(), mat);
+	outs = hzproc.Transform.Fast(img:cuda(), mat);
 	-- display the images
 	-- image.display(O)
     return outs

@@ -39,25 +39,23 @@ local function createModel(opt)
     -- model:add(nn.Linear(64*32*32,64))
     -- model:add(ReLU())
 
-    model:add(Conv(2, 8, 5, 5, 2, 2, 2, 2))
+    model:add(Conv(2, 20, 5, 5, 1, 1, 2, 2))
     model:add(MaxPool(2,2,2,2))
     model:add(ReLU())
-    model:add(Conv(8, 16, 5, 5, 2, 2, 2, 2))
+    model:add(Conv(20, 20, 5, 5))
     model:add(MaxPool(2,2,2,2))
     model:add(ReLU())
-    model:add(Conv(16, 32, 5, 5, 2, 2, 2, 2))
-    model:add(MaxPool(2,2,2,2))
-    model:add(ReLU())
-    model:add(Conv(32, 64, 5, 5, 2, 2, 2, 2))
+    model:add(Conv(20, 20, 5, 5))
+    -- model:add(MaxPool(2,2,2,2))
     model:add(ReLU())
 
-    model:add(nn.View(64*2*2))
-    model:add(nn.Linear(64*2*2,64))
+    model:add(nn.View(20*2*2))
+    model:add(nn.Linear(20*2*2,20))
     model:add(ReLU())
 
 
     -- we initialize the output layer so it gives the identity transform
-    local outLayer = nn.Linear(64,6)
+    local outLayer = nn.Linear(20,6)
     outLayer.weight:fill(0)
     local bias = torch.FloatTensor(6):fill(0)
     bias[1]=1
