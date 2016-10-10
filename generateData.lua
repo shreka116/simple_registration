@@ -5,7 +5,7 @@ require 'math'
 require 'paths'
 
 
-cutorch.setDevice(2)
+cutorch.setDevice(1)
 torch.setnumthreads(1)
 torch.setdefaulttensortype('torch.FloatTensor')
 
@@ -35,11 +35,11 @@ function hzproc_Affine(img, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y
 	outs = hzproc.Transform.Fast(img:cuda(), mat);
 	-- display the images
 	-- image.display(O)
-    return outs
+    return outs, mat:transpose(1,2)
 end
 
 print('generating data ......')
-for iter = 1, total_iter do 
+for iter = 1, total_iter do
 
     if (iter%1000) == 0 and iter < 24000 then
         ref_cnt = ref_cnt + 1
@@ -47,7 +47,7 @@ for iter = 1, total_iter do
     end
 
     if (iter%1000) == 1 then
-    
+
         local tmp_ref = image.scale(ref:float(), targetImgSize, targetImgSize)
         image.save(targetFolder .. 'brain_' .. string.format('%05d', img_cnt) .. '_1.png', tmp_ref)
 
@@ -60,18 +60,26 @@ for iter = 1, total_iter do
         local rotation= torch.uniform(-20, 20)*math.pi/180
 
         local tform = torch.zeros(2,3)
-        tform[1][1]   = scale_x*math.cos(rotation)
-        tform[1][2]   = -shear_x*math.sin(rotation)
-        tform[1][3]   = trans_x
-        tform[2][1]   = scale_y*math.sin(rotation)
-        tform[2][2]   = shear_y*math.cos(rotation)
-        tform[2][3]   = trans_y
+        -- tform[1][1]   = scale_x*math.cos(rotation)
+        -- tform[1][2]   = -shear_x*math.sin(rotation)
+        -- tform[1][3]   = trans_x
+        -- tform[2][1]   = scale_y*math.sin(rotation)
+        -- tform[2][2]   = shear_y*math.cos(rotation)
+        -- tform[2][3]   = trans_y
 
-        local tmp_tar = hzproc_Affine(tmp_ref, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y, rotation)
+        local tmp_tar,matt = hzproc_Affine(tmp_ref, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y, rotation)
+        tform[1][1]      = matt[1][1]
+        tform[1][2]      = matt[1][2]
+        tform[1][3]      = matt[1][3]
+        tform[2][1]      = matt[2][1]
+        tform[2][2]      = matt[2][2]
+        tform[2][3]      = matt[2][3]
+
+
         local tar     = image.scale(tmp_tar:float(), targetImgSize, targetImgSize)
         image.save(targetFolder .. 'brain_' .. string.format('%05d', img_cnt) .. '_2.png', tar)
         torch.save(targetFolder .. 'brain_' .. string.format('%05d', img_cnt) .. '_gt.t7', tform)
-    
+
         print('apply trasformations to image# ' .. tostring(ref_cnt) .. '...')
     else
 
@@ -99,14 +107,22 @@ for iter = 1, total_iter do
          rotation= torch.uniform(-10, 10)*math.pi/180
 
         local tform = torch.zeros(2,3)
-        tform[1][1]   = scale_x*math.cos(rotation)
-        tform[1][2]   = -shear_x*math.sin(rotation)
-        tform[1][3]   = trans_x
-        tform[2][1]   = scale_y*math.sin(rotation)
-        tform[2][2]   = shear_y*math.cos(rotation)
-        tform[2][3]   = trans_y
+        -- tform[1][1]   = scale_x*math.cos(rotation)
+        -- tform[1][2]   = -shear_x*math.sin(rotation)
+        -- tform[1][3]   = trans_x
+        -- tform[2][1]   = scale_y*math.sin(rotation)
+        -- tform[2][2]   = shear_y*math.cos(rotation)
+        -- tform[2][3]   = trans_y
+ 
 
-        local tmp_tar = hzproc_Affine(tmp_ref2, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y, rotation)
+        local tmp_tar, matt = hzproc_Affine(tmp_ref2, trans_x, trans_y, scale_x, scale_y, shear_x, shear_y, rotation)
+        tform[1][1]      = matt[1][1]
+        tform[1][2]      = matt[1][2]
+        tform[1][3]      = matt[1][3]
+        tform[2][1]      = matt[2][1]
+        tform[2][2]      = matt[2][2]
+        tform[2][3]      = matt[2][3]
+
         local tar     = image.scale(tmp_tar:float(), targetImgSize, targetImgSize)
         image.save(targetFolder .. 'brain_' .. string.format('%05d', img_cnt) .. '_2.png', tar)
         torch.save(targetFolder .. 'brain_' .. string.format('%05d', img_cnt) .. '_gt.t7', tform)

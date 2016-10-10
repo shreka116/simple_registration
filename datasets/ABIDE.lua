@@ -111,7 +111,7 @@ function ABIDEDataset:preprocess()
             t.Translations(0.2),
             t.HorizontalFlip(1),
             t.Rotation(17),
-            t.Scales(32,32)
+            t.Scales(0.8,1.2)
        --  t.Lighting(0.1, pca.eigval, pca.eigvec),
         --  t.ColorNormalize(meanstd),
         --  t.HorizontalFlip(0.5),
@@ -129,7 +129,7 @@ function ABIDEDataset:preprocess()
    elseif self.split == 'val' then
           return t.SelectTransform{
               t.Identity(),
-              t.Scales(32,32)
+            --   t.Scales(32,32)
 
 --            t.AdditiveGausNoise(0, 0.04),
 --            t.Contrast(-0.8, 0.4),

@@ -8,6 +8,7 @@ require 'gnuplot'
 require 'torch'
 require 'paths'
 require 'optim'
+require 'hzproc'
 require 'nn'
 
 local models        = require 'models/init'
@@ -52,19 +53,30 @@ end
 
 
 --------TO DO -----------TO DO----------------
+local trainLosses = {}
+local testLosses = {}
+
 local startEpoch = checkpoint and checkpoint.epoch + 1 or opt.epochNumber
 for epoch = startEpoch, opt.nEpochs do
    -- Train for a single epoch
    local trainLoss  = trainer:train(epoch, trainLoader)
+   trainLosses[#trainLosses + 1] = trainLoss
+   gnuplot.pngfigure('losses/trainLoss.png')
+   gnuplot.plot({torch.range(1, #trainLosses), torch.Tensor(trainLosses), '-'})
+   gnuplot.plotflush()
 
-   local lossFile = 'trainLoss_' .. epoch .. '.t7'
-   torch.save(paths.concat(opt.save, lossFile), trainLoss)
+--    local lossFile = 'trainLoss_' .. epoch .. '.t7'
+--    torch.save(paths.concat(opt.save, lossFile), trainLoss)
 
    -- Run model on validation set
    local testLoss   = trainer:test(epoch, valLoader)
+   testLosses[#testLosses + 1] = testLoss
+   gnuplot.pngfigure('losses/testLoss.png')
+   gnuplot.plot({torch.range(1, #testLosses), torch.Tensor(testLosses), '-'})
+   gnuplot.plotflush()
 
-   local testLossFile = 'testLoss_' .. epoch .. '.t7'
-   torch.save(paths.concat(opt.save, testLossFile), testLoss)
+--    local testLossFile = 'testLoss_' .. epoch .. '.t7'
+--    torch.save(paths.concat(opt.save, testLossFile), testLoss)
 
    checkpoints.save(epoch, model, trainer.optimState, opt)
 end

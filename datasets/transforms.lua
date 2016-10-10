@@ -36,17 +36,16 @@ local M = {}
 -- Randomly samples one of transforms to perform
 function M.SelectTransform(transforms)
    return function(input)
-    --   print('transforms: ' .. tostring(#transforms))
-    --   print('types: ' .. tostring(trTypes))
-        local photometric  = torch.random(1,5)
-        local geometric    = torch.random(5,8)
 
-        if #transforms ~= 2 then
+        local photometric  = torch.random(1,5)
+        local geometric    = torch.random(5,9)
+
+        if #transforms ~= 1 then
           input = transforms[photometric](input)
           input = transforms[geometric](input)
         end
         
-        input = transforms[#transforms](input)
+        -- input = transforms[#transforms](input)
 
       return input
    end
@@ -492,29 +491,42 @@ function M.Rotation(var)
    end
 end
 
--- function M.Scales(minSize, maxSize)
---    return function(input)
---       local w, h        = input:size(3), input:size(2)
---       local factors     = torch.uniform(minSize, maxSize)
---       local w1          = math.ceil(w*factors)
---       local h1          = math.ceil(h*factors)
---       local scaled      = image.scale(input, w1, h1)
-      
---       return scaled_input--, rel_scaled_input  
---    end
--- end
-
-function M.Scales(w1, h1)
+function M.Scales(minSize, maxSize)
    return function(input)
-      -- local w, h        = input:size(3), input:size(2)
-      -- local factors     = torch.uniform(minSize, maxSize)
-      -- local w1          = math.ceil(w*factors)
-      -- local h1          = math.ceil(h*factors)
-      local scaled      = image.scale(input, w1, h1)
+      local w, h        = input:size(3), input:size(2)
+      local factors     = torch.uniform(minSize, maxSize)
+      local w1          = math.ceil(w*factors)
+      local h1          = math.ceil(h*factors)
+      local scaled      = torch.zeros(input:size())
+
+      if factors > 1 then
+        local w_c = math.ceil(w1/2)
+        local h_c = math.ceil(h1/2)
+        local tmp_scled = image.scale(input, w1, h1)
+        -- scaled[{ {},{},{} }] = tmp_scled[{ {},{h_c - math.floor(h/2), h_c + math.floor(h/2)},{w_c - math.floor(w/2), w_c + math.floor(w/2)} }]
+        scaled[{ {},{},{} }] = tmp_scled[{ {},{h_c - 128, h_c + 127},{w_c - 128, w_c + 127} }]
+      elseif factors < 1 then
+        scaled[{ {},{1,h1},{1,w1} }] = image.scale(input, w1, h1)
+      else
+        scaled = input:clone()
+      end
+
       
       return scaled--, rel_scaled_input  
    end
 end
+
+-- function M.Scales(w1, h1)
+--    return function(input)
+--       -- local w, h        = input:size(3), input:size(2)
+--       -- local factors     = torch.uniform(minSize, maxSize)
+--       -- local w1          = math.ceil(w*factors)
+--       -- local h1          = math.ceil(h*factors)
+--       local scaled      = image.scale(input, w1, h1)
+      
+--       return scaled--, rel_scaled_input  
+--    end
+-- end
 
 function M.Identity()
    return function(input)

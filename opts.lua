@@ -16,12 +16,12 @@ function M.parse(arg)
    cmd:text('Options:')
     ------------ General options --------------------
 --   cmd:option('-data',       '',         'Path to dataset')
-   cmd:option('-dataset',           'ABIDE',        'Options: brainMRI | ABIDE')
+   cmd:option('-dataset',           'ABIDE',        'Options: brainMRI | ABIDE | toyShapes')
    cmd:option('-manualSeed',         0,             'Manually set RNG seed')
    cmd:option('-nGPU',               1,             'Number of GPUs to use by default')
    cmd:option('-backend',           'cudnn',        'Options: cudnn | cunn')
    cmd:option('-cudnn',             'fastest',      'Options: fastest | default | deterministic')
-   cmd:option('-genData',            '../brainMRI/',         'Path to save generated files')
+   cmd:option('-genData',        '../brainMRI/',    'Path to save generated files')
    ------------- Data options ------------------------
    cmd:option('-nThreads',          2,              'number of data loading threads')
    ------------- Training options --------------------
@@ -42,7 +42,7 @@ function M.parse(arg)
    cmd:option('-beta_2',           0.999,           'second parameter of Adam optimizer')
    cmd:option('-optimizer',         'sgd',          'Options: sgd | adagrad | adam')
       ---------- Model options ----------------------------------
-   cmd:option('-networkType',       'SIMPLEnet',      'Options: USOFnet | EdgeUSOFnet')
+   cmd:option('-networkType',       'SIMPLEnet',    'Options: USOFnet | EdgeUSOFnet')
    cmd:option('-optimState',        'none',         'Path to an optimState to reload from')
    ---------- Hyper parameters  ------------------------------
 --   cmd:option('-epsilon',           0.001,      'Usually we use 0.001')
@@ -64,6 +64,9 @@ function M.parse(arg)
       -- Default nEpochs=90
       opt.nEpochs = opt.nEpochs == 0 and 200 or opt.nEpochs
    elseif opt.dataset == 'ABIDE' then
+      -- Default nEpochs=90
+      opt.nEpochs = opt.nEpochs == 0 and 200 or opt.nEpochs
+   elseif opt.dataset == 'toyShapes' then
       -- Default nEpochs=90
       opt.nEpochs = opt.nEpochs == 0 and 200 or opt.nEpochs
    else

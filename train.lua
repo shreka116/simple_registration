@@ -86,18 +86,18 @@ function Trainer:train(epoch, dataloader)
       lossSum = lossSum + loss
       debug_loss = debug_loss + loss
       if (n%200) == 0 then
-          losses[#losses + 1] = debug_loss/200
+          -- losses[#losses + 1] = debug_loss/200
 
-          gnuplot.pngfigure('losses/trainLoss_' .. tostring(epoch) .. '.png')
+          -- gnuplot.pngfigure('losses/trainLoss_' .. tostring(epoch) .. '.png')
 
-          gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
-          gnuplot.plotflush()
-          debug_loss = 0.0
+          -- gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
+          -- gnuplot.plotflush()
+          -- debug_loss = 0.0
 
           print(string.format('Gradient min: %1.4f \t max:  %1.4f \t norm: %1.4f', torch.min(self.gradParams:float()), torch.max(self.gradParams:float()), torch.norm(self.gradParams:float())))
     
-          image.save('current_ref.png', self.input[{ {1},{1},{},{} }]:reshape(1,self.input[{ {1},{1},{},{} }]:size(3),self.input[{ {1},{1},{},{} }]:size(4)))
-          image.save('current_tar.png', self.input[{ {1},{2},{},{} }]:reshape(1,self.input[{ {1},{2},{},{} }]:size(3),self.input[{ {1},{2},{},{} }]:size(4)))
+          image.save('losses/current_ref.png', self.input[{ {1},{1},{},{} }]:reshape(1,self.input[{ {1},{1},{},{} }]:size(3),self.input[{ {1},{1},{},{} }]:size(4)))
+          image.save('losses/current_tar.png', self.input[{ {1},{2},{},{} }]:reshape(1,self.input[{ {1},{2},{},{} }]:size(3),self.input[{ {1},{2},{},{} }]:size(4)))
           
           -- print(self.target:size())
           -- print(output:size())
@@ -145,31 +145,37 @@ function Trainer:test(epoch, dataloader)
       local batchSize   = output:size(1)
       local loss        = self.criterion:forward(self.model.output, self.target)
 
-      for b_iter =1, self.opt.batchSize do
-          if output[b_iter][1][1] == self.target[b_iter][1][1] then param_11 = param_11 + 1 end
-          if output[b_iter][1][2] == self.target[b_iter][1][2] then param_12 = param_12 + 1 end
-          if output[b_iter][1][3] == self.target[b_iter][1][3] then param_13 = param_13 + 1 end
-          if output[b_iter][2][1] == self.target[b_iter][2][1] then param_21 = param_21 + 1 end
-          if output[b_iter][2][2] == self.target[b_iter][2][2] then param_22 = param_22 + 1 end
-          if output[b_iter][2][3] == self.target[b_iter][2][3] then param_23 = param_23 + 1 end
-      end
+      -- for b_iter =1, self.opt.batchSize do
+      --     if output[b_iter][1][1] == self.target[b_iter][1][1] then param_11 = param_11 + 1 end
+      --     if output[b_iter][1][2] == self.target[b_iter][1][2] then param_12 = param_12 + 1 end
+      --     if output[b_iter][1][3] == self.target[b_iter][1][3] then param_13 = param_13 + 1 end
+      --     if output[b_iter][2][1] == self.target[b_iter][2][1] then param_21 = param_21 + 1 end
+      --     if output[b_iter][2][2] == self.target[b_iter][2][2] then param_22 = param_22 + 1 end
+      --     if output[b_iter][2][3] == self.target[b_iter][2][3] then param_23 = param_23 + 1 end
+      -- end
 
       N           = N + batchSize
       lossSum     = lossSum + loss
       debug_loss  = debug_loss + loss
-      if (n%10) == 0 then
+      if (n%100) == 0 then
         print((' | Test: [%d][%d/%d]    Time %.3f  loss %1.4f'):format( epoch, n, size, timer:time().real, loss))
-        losses[#losses + 1] = debug_loss/10
-        gnuplot.pngfigure('losses/testLoss_' .. tostring(epoch) .. '.png')
-        gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
-        gnuplot.plotflush()
-        debug_loss = 0.0
-        if (n%100) == 0 then
-            print('============================================================================')
-            print(('|  Accuracy: [%2.4f%%  %2.4f%%  %2.4f%%]'):format(param_11/N*100, param_12/N*100, param_13/N*100))
-            print(('|            [%2.4f%%  %2.4f%%  %2.4f%%]'):format(param_21/N*100, param_22/N*100, param_23/N*100))
-            print('============================================================================')
-        end
+        -- losses[#losses + 1] = debug_loss/10
+        -- gnuplot.pngfigure('losses/testLoss_' .. tostring(epoch) .. '.png')
+        -- gnuplot.plot({ torch.range(1, #losses), torch.Tensor(losses), '-' })
+        -- gnuplot.plotflush()
+        -- debug_loss = 0.0
+        -- if (n%100) == 0 then
+        --     print('============================================================================')
+        --     print(('|  Accuracy: [%2.4f%%  %2.4f%%  %2.4f%%]'):format(param_11/N*100, param_12/N*100, param_13/N*100))
+        --     print(('|            [%2.4f%%  %2.4f%%  %2.4f%%]'):format(param_21/N*100, param_22/N*100, param_23/N*100))
+        --     print('============================================================================')
+        -- end
+
+        local mat = torch.zeros(3, 3):cuda()
+        mat[{ {1,2},{} }] = output:select(1,1):clone()
+        mat[3][3] = 1
+        local test_img = hzproc.Transform.Fast(self.input[{ {1},{1},{},{} }]:reshape(1,256,256), mat:transpose(1,2));
+        image.save('losses/test_img.png', test_img:reshape(1,256,256))
       end
 
       timer:reset()
@@ -198,7 +204,7 @@ end
 function Trainer:learningRate(epoch)
    -- Training schedule
    local decay = 0
-   if (epoch >= 30000) and (epoch%10 == 0) then
+   if (epoch >= 30) and (epoch%30 == 0) then
 	return self.optimState.learningRate/2
    else
 	return self.optimState.learningRate

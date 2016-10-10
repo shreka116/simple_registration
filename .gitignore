@@ -6,3 +6,5 @@ checkpoints/trainLoss_*.t7
 losses/*.png
 
 trainSpecs/training_*.txt
+
+*.txt

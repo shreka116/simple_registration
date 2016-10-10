@@ -21,13 +21,13 @@ end
 function M.create(opt, split)
    local cachePath
    if opt.dataset == 'brainMRI' then
-        cachePath = (opt.genData .. '/' .. opt.dataset .. '/' .. opt.dataset .. '.t7')
+        cachePath = (opt.genData .. opt.dataset .. '/' .. opt.dataset .. '.t7')
    else
-        cachePath = (opt.genData .. '/' .. opt.dataset .. '/' .. opt.dataset .. '.t7')
+        cachePath = (opt.genData .. opt.dataset .. '/' .. opt.dataset .. '.t7')
    end
    
    if not paths.filep(cachePath) or not isvalid(opt, cachePath) then
-      paths.mkdir('../dataset')
+    --   paths.mkdir('../dataset')
 
       local script = paths.dofile(opt.dataset .. '-genData.lua')
       script.exec(opt, cachePath)
